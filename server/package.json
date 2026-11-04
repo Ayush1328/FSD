@@ -1,12 +1,14 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "seed": "node seed.js",
+    "test": "node test/concurrencyTest.js"
   },
   "dependencies": {
+    "axios": "^1.21.0",
     "bcrypt": "^6.0.0",
     "cloudinary": "^1.41.3",
     "cookie-parser": "^1.4.7",
@@ -19,6 +21,7 @@
     "mongoose": "^9.11.4",
     "multer": "^2.5.0",
     "multer-storage-cloudinary": "^4.0.0",
+    "node-cron": "^4.6.0",
     "socket.io": "^4.8.4",
     "zod": "^4.6.7"
   }

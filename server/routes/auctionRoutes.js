@@ -4,13 +4,15 @@ const {
   createAuction, 
   getAuctions, 
   getAuctionById, 
-  cancelAuction 
+  cancelAuction,
+  getUserAuctionsAndBids
 } = require('../controllers/auctionController');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const { upload } = require('../config/cloudinary');
 
 // Public routes
 router.get('/', getAuctions);
+router.get('/user/activity', authMiddleware, getUserAuctionsAndBids);
 router.get('/:id', getAuctionById);
 
 // Protected routes (Requires valid JWT Access Token)
