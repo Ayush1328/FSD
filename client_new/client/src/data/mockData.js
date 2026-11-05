@@ -483,3 +483,4 @@ export const FOOTER_LINKS = {
     { label: 'Auction stories', href: '#features' }
   ]
 };
+

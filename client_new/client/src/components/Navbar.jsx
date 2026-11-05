@@ -93,6 +93,13 @@ export default function Navbar() {
           >
             FAQ
           </a>
+          <Link
+            to="/arcade"
+            className="text-[#F0D0B0] hover:text-white transition-colors flex items-center space-x-1.5 font-bold"
+          >
+            <span>🎮 2-4P Casino</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+          </Link>
         </nav>
 
         {/* Right: Auth & Registration Pill */}
@@ -214,6 +221,14 @@ export default function Navbar() {
               className="py-1 text-white/80 hover:text-white"
             >
               Browse all auctions
+            </Link>
+            <Link
+              to="/arcade"
+              onClick={() => setMobileMenuOpen(false)}
+              className="py-1 text-[#F0D0B0] font-bold flex items-center space-x-1.5"
+            >
+              <span>🎮 2-4P Casino &amp; Stakes</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
             </Link>
           </nav>
 
