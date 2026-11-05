@@ -194,7 +194,7 @@ export default function AuctionDetail() {
   const hasEnoughFunds = availableFunds >= Number(bidAmount);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-20">
+    <div className="max-w-6xl mx-auto space-y-8 pb-20 px-4 sm:px-6 pt-6">
       
       {/* Alert Notices */}
       {message && (

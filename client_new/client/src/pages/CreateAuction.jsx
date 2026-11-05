@@ -64,7 +64,7 @@ export default function CreateAuction() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 pb-16">
+    <div className="max-w-3xl mx-auto space-y-8 pb-16 px-4 sm:px-6 pt-6">
       
       <div>
         <h1 className="text-3xl font-extrabold text-white flex items-center space-x-3">
