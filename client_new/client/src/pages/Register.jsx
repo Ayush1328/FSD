@@ -13,6 +13,8 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Clear any stale token so it doesn't interfere with registration
+    localStorage.removeItem('token');
     const res = await register(name, email, password);
     if (res.success) {
       navigate('/');

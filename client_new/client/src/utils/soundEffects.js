@@ -243,3 +243,4 @@ export function triggerConfetti() {
 
   requestAnimationFrame(render);
 }
+

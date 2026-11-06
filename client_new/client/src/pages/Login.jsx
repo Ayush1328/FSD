@@ -12,6 +12,8 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Clear any stale token before login
+    localStorage.removeItem('token');
     const res = await login(email, password);
     if (res.success) {
       navigate('/');
@@ -19,6 +21,8 @@ export default function Login() {
   };
 
   const handleQuickDemo = async (demoEmail, demoPass) => {
+    // Clear any stale token before demo login
+    localStorage.removeItem('token');
     setEmail(demoEmail);
     setPassword(demoPass);
     const res = await login(demoEmail, demoPass);

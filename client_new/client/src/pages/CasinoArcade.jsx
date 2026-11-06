@@ -31,6 +31,7 @@ import {
 export default function CasinoArcade() {
   const { user, wallet, fetchMe } = useAuthStore();
   const [activeTab, setActiveTab] = useState('multiplayer'); // 'multiplayer' | 'mines' | 'crash' | 'plinko'
+  const [searchQuery, setSearchQuery] = useState('');
   const [faucetLoading, setFaucetLoading] = useState(false);
   const [faucetMessage, setFaucetMessage] = useState(null);
 
@@ -105,6 +106,49 @@ export default function CasinoArcade() {
       )}
 
       {/* Navigation Game Tabs */}
+        <div className="flex items-center space-x-2 border-b border-[#1C1710]/15 overflow-x-auto no-scrollbar pb-2">
+          {[{ id: 'multiplayer', label: 'Multiplayer Arena (2-4P Live)', icon: Users, badge: 'LIVE' },
+            { id: 'mines', label: 'Mines', icon: Bomb },
+            { id: 'crash', label: 'Crash / Rocket', icon: Rocket },
+            { id: 'plinko', label: 'Plinko', icon: CircleDot }].map((tab) => {
+            const Icon = tab.icon;
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 px-5 py-3 rounded-full text-xs sm:text-sm font-semibold transition-all whitespace-nowrap ${
+                  isActive
+                    ? 'bg-[#1C1710] text-white shadow-md'
+                    : 'bg-[#FAF6EE] text-[#1C1710]/70 hover:text-[#1C1710] hover:bg-white'
+                }`}
+              >
+                <Icon className="w-4 h-4 text-[#A8432A]" />
+                <span>{tab.label}</span>
+                {tab.badge && (
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                )}
+              </button>
+            );
+          })}
+          {/* Search Games */}
+          <div className="ml-auto flex items-center space-x-2">
+            <input
+              type="text"
+              placeholder="Search rooms..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="px-3 py-1 text-sm border rounded-full focus:outline-none focus:ring-2 focus:ring-[#A8432A]"
+            />
+            <button
+              type="button"
+              onClick={() => {}}
+              className="px-3 py-1 text-xs bg-[#A8432A] text-white rounded-full hover:bg-[#B95C3E] transition"
+            >
+              Search
+            </button>
+          </div>
+        </div>
       <div className="flex items-center space-x-2 border-b border-[#1C1710]/15 overflow-x-auto no-scrollbar pb-2">
         {[
           { id: 'multiplayer', label: 'Multiplayer Arena (2-4P Live)', icon: Users, badge: 'LIVE' },
@@ -1265,3 +1309,4 @@ function PlinkoGame() {
     </div>
   );
 }
+

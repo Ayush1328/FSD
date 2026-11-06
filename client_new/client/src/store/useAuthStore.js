@@ -39,6 +39,8 @@ export const useAuthStore = create((set, get) => ({
   login: async (email, password) => {
     try {
       set({ isLoading: true, error: null });
+      // Clear any stale token so interceptor won't attach it
+      localStorage.removeItem('token');
       const res = await API.post('/auth/login', { email, password });
       const { accessToken, user, wallet } = res.data;
 
@@ -65,6 +67,8 @@ export const useAuthStore = create((set, get) => ({
   register: async (name, email, password) => {
     try {
       set({ isLoading: true, error: null });
+      // Clear any stale token so interceptor won't attach it
+      localStorage.removeItem('token');
       const res = await API.post('/auth/register', { name, email, password });
       const { accessToken, user, wallet } = res.data;
 
@@ -81,7 +85,9 @@ export const useAuthStore = create((set, get) => ({
       reconnectSocketWithToken(accessToken);
       return { success: true };
     } catch (err) {
-      const msg = err.response?.data?.message || err.response?.data?.errors?.[0] || 'Registration failed.';
+      // Backend validator returns { errors: [...] }, controller returns { message: '...' }
+      const data = err.response?.data;
+      const msg = data?.message || (Array.isArray(data?.errors) ? data.errors.join(', ') : null) || 'Registration failed.';
       set({ error: msg, isLoading: false });
       return { success: false, message: msg };
     }
