@@ -15,8 +15,20 @@ import {
   Wallet,
   ArrowUpRight,
   ShieldCheck,
-  User
+  User,
+  Volume2,
+  VolumeX,
+  Flame,
+  Coins,
+  Rocket,
+  Sparkles
 } from 'lucide-react';
+import {
+  playGavelSound,
+  playWinSound,
+  playOutbidSound,
+  triggerConfetti
+} from '../utils/soundEffects';
 
 export default function AuctionDetail() {
   const { id } = useParams();
@@ -30,6 +42,9 @@ export default function AuctionDetail() {
   const [message, setMessage] = useState(null);
   const [errorMessage, setErrorMessage] = useState(null);
   const [isExtended, setIsExtended] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [paddleRaised, setPaddleRaised] = useState(false);
+  const [liveReactions, setLiveReactions] = useState([]);
 
   // 1. Initial Data Fetch
   const fetchAuctionAndBids = async () => {
@@ -91,15 +106,29 @@ export default function AuctionDetail() {
         const nextMin = Math.ceil((data.currentBid * 1.01) * 100) / 100;
         setBidAmount(nextMin);
 
+        // Sound effect
+        if (soundEnabled) {
+          playGavelSound();
+        }
+
         // Update user's wallet
         fetchMe();
       }
+    };
+
+    // Event: Live reaction from another bidder
+    const handleNewReaction = (rx) => {
+      setLiveReactions((prev) => [...prev.slice(-8), rx]);
+      setTimeout(() => {
+        setLiveReactions((prev) => prev.filter((r) => r.id !== rx.id));
+      }, 2500);
     };
 
     // Event: Anti-Sniping timer extension
     const handleAuctionExtended = (data) => {
       if (data.auctionId === id) {
         setIsExtended(true);
+        if (soundEnabled) playOutbidSound();
         setAuction((prev) => prev ? { ...prev, endsAt: data.newEndsAt } : prev);
         setMessage({
           type: 'warning',
@@ -112,25 +141,34 @@ export default function AuctionDetail() {
     const handleAuctionEnded = (data) => {
       if (data.auctionId === id) {
         setAuction((prev) => prev ? { ...prev, status: 'ended' } : prev);
+        if (soundEnabled) playWinSound();
+        triggerConfetti();
         setMessage({
           type: 'info',
-          text: `Auction concluded! Winner: ${data.highestBidder?.name || 'Top Bidder'} for $${data.finalPrice}`
+          text: `Auction concluded! Winner: ${data.highestBidder?.name || 'Top Bidder'} for ₹${data.finalPrice?.toLocaleString() || data.finalPrice}`
         });
         fetchMe();
       }
     };
 
     socket.on('bid:new', handleNewBid);
+    socket.on('auction:new_reaction', handleNewReaction);
     socket.on('auction:extended', handleAuctionExtended);
     socket.on('auction:ended', handleAuctionEnded);
 
     return () => {
       leaveAuctionRoom(id);
       socket.off('bid:new', handleNewBid);
+      socket.off('auction:new_reaction', handleNewReaction);
       socket.off('auction:extended', handleAuctionExtended);
       socket.off('auction:ended', handleAuctionEnded);
     };
-  }, [id]);
+  }, [id, soundEnabled]);
+
+  const sendLiveReaction = (emoji) => {
+    const socket = getSocket();
+    socket.emit('auction:send_reaction', { auctionId: id, emoji });
+  };
 
   // Handle Placing Bid
   const handlePlaceBid = async (e) => {
@@ -146,6 +184,10 @@ export default function AuctionDetail() {
 
     try {
       setBiddingLoading(true);
+      setPaddleRaised(true);
+      if (soundEnabled) playGavelSound();
+      setTimeout(() => setPaddleRaised(false), 900);
+
       const res = await API.post(`/bids/${id}`, { amount });
       
       setMessage({
@@ -194,7 +236,59 @@ export default function AuctionDetail() {
   const hasEnoughFunds = availableFunds >= Number(bidAmount);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-20">
+    <div className="max-w-6xl mx-auto space-y-8 pb-20 px-4 sm:px-6 pt-6 relative">
+
+      {/* Floating Animated Wooden Bidding Paddle */}
+      {paddleRaised && (
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 pointer-events-none animate-bounce">
+          <div className="bg-[#A8432A] text-white border-4 border-amber-300 rounded-full w-40 h-40 flex flex-col items-center justify-center shadow-2xl transform rotate-6">
+            <span className="text-3xl font-display font-black text-amber-200">#BID</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-white">Paddle Raised!</span>
+          </div>
+          <div className="w-6 h-28 bg-amber-900 mx-auto rounded-b-xl shadow-lg -mt-3"></div>
+        </div>
+      )}
+
+      {/* Floating Live Crowd Reactions Container */}
+      <div className="fixed bottom-24 right-6 pointer-events-none z-50 flex flex-col items-end space-y-2">
+        {liveReactions.map((rx) => (
+          <div
+            key={rx.id}
+            className="animate-bounce bg-[#1C1710]/95 text-white border border-white/20 rounded-full px-3.5 py-1.5 shadow-2xl text-sm flex items-center space-x-1.5 backdrop-blur-md"
+          >
+            <span className="text-xl">{rx.emoji}</span>
+            <span className="text-xs text-[#F0D0B0] font-semibold">{rx.sender}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Top Bar: Back Link & Sound Control */}
+      <div className="flex items-center justify-between">
+        <Link
+          to="/auctions"
+          className="text-xs font-semibold text-[#1C1710]/70 hover:text-[#1C1710] flex items-center space-x-1"
+        >
+          <span>← Back to all lots</span>
+        </Link>
+
+        <button
+          type="button"
+          onClick={() => setSoundEnabled(!soundEnabled)}
+          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full bg-white border border-[#1C1710]/15 text-xs font-semibold text-[#1C1710] hover:bg-[#FAF6EE] shadow-sm transition"
+        >
+          {soundEnabled ? (
+            <>
+              <Volume2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Gavel Sound: ON</span>
+            </>
+          ) : (
+            <>
+              <VolumeX className="w-3.5 h-3.5 text-slate-400" />
+              <span>Gavel Sound: Muted</span>
+            </>
+          )}
+        </button>
+      </div>
       
       {/* Alert Notices */}
       {message && (
@@ -313,6 +407,27 @@ export default function AuctionDetail() {
                   <span>You are the seller of this item. Bidding is disabled for you.</span>
                 </div>
               ) : null}
+            </div>
+
+            {/* Live Crowd Reaction Toolbar */}
+            <div className="mt-4 p-3 bg-slate-800/60 rounded-2xl border border-slate-700/60 flex items-center justify-between">
+              <span className="text-[10px] font-label font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-1">
+                <Flame className="w-3.5 h-3.5 text-amber-400" />
+                <span>Live Reactions:</span>
+              </span>
+              <div className="flex items-center space-x-1.5">
+                {['🔥', '🔨', '💰', '🚀', '😱'].map((emoji) => (
+                  <button
+                    key={emoji}
+                    type="button"
+                    onClick={() => sendLiveReaction(emoji)}
+                    className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-sm flex items-center justify-center transition-transform hover:scale-125 active:scale-95 shadow-sm border border-slate-700"
+                    title={`Send ${emoji} to all bidders`}
+                  >
+                    {emoji}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Bidding Form (Only if active and not seller) */}

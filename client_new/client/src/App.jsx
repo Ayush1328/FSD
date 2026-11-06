@@ -4,7 +4,9 @@ import { useAuthStore } from './store/useAuthStore';
 import { getSocket } from './services/socket';
 
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Home from './pages/Home';
+import AuctionsList from './pages/AuctionsList';
 import AuctionDetail from './pages/AuctionDetail';
 import CreateAuction from './pages/CreateAuction';
 import Wallet from './pages/Wallet';
@@ -12,6 +14,7 @@ import MyActivity from './pages/MyActivity';
 import AdminDashboard from './pages/AdminDashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import CasinoArcade from './pages/CasinoArcade';
 
 import { AlertTriangle, X } from 'lucide-react';
 
@@ -34,7 +37,7 @@ export default function App() {
     fetchMe();
   }, []);
 
-  // Global socket listener for private notifications (like being outbid)
+  // Global socket listener for private notifications (e.g. being outbid)
   useEffect(() => {
     if (!user) return;
 
@@ -42,7 +45,7 @@ export default function App() {
     const handleOutbid = (data) => {
       setGlobalAlert({
         title: '⚠️ You were outbid!',
-        message: data.message || `Another bidder placed $${data.newBid} on "${data.auctionTitle}"`
+        message: data.message || `Another bidder placed ₹${data.newBid} on "${data.auctionTitle}"`
       });
     };
 
@@ -55,19 +58,20 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
+      <div className="min-h-screen bg-[#F5F0E8] text-[#1C1710] flex flex-col font-sans selection:bg-[#A8432A] selection:text-white">
         
         {/* Floating Global Notification Toast */}
         {globalAlert && (
-          <div className="fixed bottom-6 right-6 z-50 max-w-sm bg-rose-950/95 border border-rose-500/80 rounded-2xl p-4 shadow-2xl backdrop-blur-md flex items-start space-x-3 animate-slide-in">
-            <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+          <div className="fixed bottom-6 right-6 z-50 max-w-sm bg-[#1C1710] text-white border border-[#A8432A] rounded-2xl p-4 shadow-2xl backdrop-blur-md flex items-start space-x-3 animate-bounce">
+            <AlertTriangle className="w-5 h-5 text-[#F0D0B0] shrink-0 mt-0.5" />
             <div className="flex-1 text-xs space-y-1">
-              <div className="font-bold text-rose-200">{globalAlert.title}</div>
-              <div className="text-slate-300">{globalAlert.message}</div>
+              <div className="font-bold text-[#F0D0B0]">{globalAlert.title}</div>
+              <div className="text-white/80">{globalAlert.message}</div>
             </div>
             <button
               onClick={() => setGlobalAlert(null)}
-              className="text-slate-400 hover:text-white transition"
+              className="text-white/60 hover:text-white transition"
+              aria-label="Dismiss alert"
             >
               <X className="w-4 h-4" />
             </button>
@@ -76,10 +80,13 @@ export default function App() {
 
         <Navbar />
 
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+        <main className="flex-1 w-full">
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/auctions" element={<AuctionsList />} />
             <Route path="/auctions/:id" element={<AuctionDetail />} />
+            <Route path="/arcade" element={<CasinoArcade />} />
+            <Route path="/casino" element={<CasinoArcade />} />
             <Route
               path="/create"
               element={
@@ -118,16 +125,7 @@ export default function App() {
           </Routes>
         </main>
 
-        <footer className="border-t border-slate-800/80 bg-slate-950/90 py-8 text-center text-xs text-slate-500">
-          <div className="max-w-7xl mx-auto px-4 space-y-2">
-            <div className="font-semibold text-slate-400">
-              BidShield &copy; {new Date().getFullYear()} — Real-Time Bidding & Fraud Detection Platform
-            </div>
-            <p className="text-[11px] text-slate-600">
-              Full-Stack MERN Architecture with Socket.IO, MongoDB Replica Set Transactions, and Anti-Sniping Protection.
-            </p>
-          </div>
-        </footer>
+        <Footer />
 
       </div>
     </BrowserRouter>

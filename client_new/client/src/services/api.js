@@ -1,14 +1,25 @@
 import axios from 'axios';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
 const API = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: API_BASE_URL,
   withCredentials: true
 });
 
 API.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  // Public auth endpoints must not receive a stale token from local storage.
+  const isPublicAuthRoute = ['/auth/register', '/auth/login', '/auth/demo-login']
+    .some((route) => config.url?.includes(route));
+  if (!isPublicAuthRoute) {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  // Ensure JSON payloads are sent with correct header
+  if (config.method && ['post', 'put', 'patch'].includes(config.method) && !config.headers['Content-Type']) {
+    config.headers['Content-Type'] = 'application/json';
   }
   return config;
 }, (error) => Promise.reject(error));

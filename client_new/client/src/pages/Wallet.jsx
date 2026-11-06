@@ -54,7 +54,7 @@ export default function Wallet() {
   const available = Math.max(0, balance - held);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-16">
+    <div className="max-w-5xl mx-auto space-y-8 pb-16 px-4 sm:px-6 pt-6">
       
       {/* Title */}
       <div>

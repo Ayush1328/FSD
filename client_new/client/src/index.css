@@ -1,1 +1,80 @@
 @import "tailwindcss";
+
+@theme {
+  --color-cream: #F5F0E8;
+  --color-dark: #1C1710;
+  --color-terracotta: #A8432A;
+  --color-terracotta-card: #B95C3E;
+  --color-peach: #F0D0B0;
+  --color-forest: #3E6140;
+  --color-pricing-bg: #EDE5D6;
+  --color-pricing-card: #FAF6EE;
+  --color-cta-deep: #3B2012;
+
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+:root {
+  --bg-cream: #F5F0E8;
+  --text-dark: #1C1710;
+  --accent-terracotta: #A8432A;
+  --accent-peach: #F0D0B0;
+  --card-terracotta: #B95C3E;
+  --accent-forest: #3E6140;
+  --pricing-bg: #EDE5D6;
+  --pricing-card: #FAF6EE;
+  --cta-deep: #3B2012;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #F5F0E8;
+  color: #1C1710;
+}
+
+/* Custom Utilities for BidVault Design System */
+.font-display {
+  font-family: 'Fraunces', Georgia, serif;
+}
+
+.font-ui {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.font-label {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Hide scrollbars for clean horizontal tab/carousel scrolling */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Glassmorphism helpers */
+.glass-pill {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.glass-pill-dark {
+  background: rgba(28, 23, 16, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.glass-chip-light {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
