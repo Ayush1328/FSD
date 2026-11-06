@@ -14,7 +14,6 @@ import MyActivity from './pages/MyActivity';
 import AdminDashboard from './pages/AdminDashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import CasinoArcade from './pages/CasinoArcade';
 
 import { AlertTriangle, X } from 'lucide-react';
 
@@ -85,8 +84,6 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/auctions" element={<AuctionsList />} />
             <Route path="/auctions/:id" element={<AuctionDetail />} />
-            <Route path="/arcade" element={<CasinoArcade />} />
-            <Route path="/casino" element={<CasinoArcade />} />
             <Route
               path="/create"
               element={

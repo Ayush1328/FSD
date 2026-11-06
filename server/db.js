@@ -7,7 +7,7 @@ const connectDB = async () => {
   const uri = process.env.MONGO_URI || DEFAULT_URI;
   try {
     await mongoose.connect(uri);
-    console.log(`MongoDB connected successfully to ${uri}`);
+    console.log(`MongoDB connected successfully to host: ${mongoose.connection.host}`);
   } catch (error) {
     console.error('MongoDB connection error:', error.message);
     // If the first attempt used a remote Atlas URI and failed, retry with the default local URI.

@@ -87,8 +87,20 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 if (process.env.NODE_ENV !== 'test') {
+  server.on('error', (e) => {
+    if (e.code === 'EADDRINUSE') {
+      const nextPort = Number(PORT) + 1;
+      console.warn(`[Server] Port ${PORT} is in use (common with macOS AirPlay), switching to port ${nextPort}...`);
+      server.listen(nextPort, () => {
+        console.log(`🚀 Auction Server running on http://localhost:${nextPort}`);
+      });
+    } else {
+      console.error('[Server Error]:', e);
+    }
+  });
+
   server.listen(PORT, () => {
     console.log(`🚀 Auction Server running on http://localhost:${PORT}`);
   });
