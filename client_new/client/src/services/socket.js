@@ -1,7 +1,12 @@
 import { io } from 'socket.io-client';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || new URL(API_BASE_URL).origin;
+const DEFAULT_PROD_API = 'https://bidvault-api-o6dt.onrender.com/api';
+const DEFAULT_DEV_API = 'http://localhost:5001/api';
+const DEFAULT_PROD_SOCKET = 'https://bidvault-api-o6dt.onrender.com';
+const DEFAULT_DEV_SOCKET = 'http://localhost:5001';
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? DEFAULT_PROD_API : DEFAULT_DEV_API);
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || (import.meta.env.PROD ? DEFAULT_PROD_SOCKET : DEFAULT_DEV_SOCKET);
 
 let socket = null;
 
