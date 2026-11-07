@@ -113,6 +113,15 @@ export default function Navbar() {
 
               {/* User Dropdown / Direct Links */}
               <Link
+                to="/create"
+                className="px-3 py-1.5 rounded-full bg-[#A8432A] hover:bg-[#8f3620] text-white text-xs font-semibold shadow-xs transition flex items-center space-x-1.5"
+                title="List a new auction item"
+              >
+                <PlusCircle className="w-3.5 h-3.5" />
+                <span>+ List Item</span>
+              </Link>
+
+              <Link
                 to="/my-activity"
                 className="text-xs text-white/80 hover:text-white transition font-medium"
               >

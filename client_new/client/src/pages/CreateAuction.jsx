@@ -31,9 +31,13 @@ export default function CreateAuction() {
     setEndsAt(d.toISOString().slice(0, 16));
   };
 
+  const [addAnother, setAddAnother] = useState(false);
+  const [successMsg, setSuccessMsg] = useState(null);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setSuccessMsg(null);
 
     if (!title || !description || !startingPrice || !endsAt) {
       setError('Please fill in all required fields.');
@@ -50,11 +54,19 @@ export default function CreateAuction() {
         imageUrl
       });
 
-      const newId = res.data.auction?._id;
-      if (newId) {
-        navigate(`/auctions/${newId}`);
+      if (addAnother) {
+        setSuccessMsg(`"${title}" listed successfully! Ready to add your next item.`);
+        setTitle('');
+        setDescription('');
+        setStartingPrice('100');
+        setImageUrl(PRESET_IMAGES[0].url);
       } else {
-        navigate('/');
+        const newId = res.data.auction?._id;
+        if (newId) {
+          navigate(`/auctions/${newId}`);
+        } else {
+          navigate('/my-activity');
+        }
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to list auction item.');
@@ -75,6 +87,13 @@ export default function CreateAuction() {
           Create a fair-play auction listing. Bids will trigger atomic holds, anti-sniping timers, and continuous fraud detection.
         </p>
       </div>
+
+      {successMsg && (
+        <div className="p-4 rounded-2xl bg-emerald-950/80 text-emerald-300 border border-emerald-500/50 flex items-center space-x-3 text-sm font-semibold shadow-lg">
+          <Sparkles className="w-5 h-5 text-emerald-400 shrink-0" />
+          <span>{successMsg}</span>
+        </div>
+      )}
 
       {error && (
         <div className="p-4 rounded-2xl bg-rose-950/80 text-rose-300 border border-rose-500/50 flex items-center space-x-3 text-sm font-semibold shadow-lg">
@@ -208,21 +227,40 @@ export default function CreateAuction() {
           )}
         </div>
 
-        {/* Submit */}
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold shadow-xl shadow-indigo-600/30 transition flex items-center justify-center space-x-2"
-        >
-          {loading ? (
-            <span>Publishing Live Auction...</span>
-          ) : (
-            <>
-              <Sparkles className="w-4 h-4" />
-              <span>Launch Live Auction</span>
-            </>
-          )}
-        </button>
+        {/* Submit Actions */}
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <button
+            type="submit"
+            disabled={loading}
+            onClick={() => setAddAnother(false)}
+            className="w-full sm:flex-1 py-3.5 rounded-2xl bg-[#1C1710] hover:bg-[#332a1e] text-white text-sm font-bold shadow-sm transition flex items-center justify-center space-x-2 disabled:opacity-50"
+          >
+            {loading && !addAnother ? (
+              <span>Publishing Item...</span>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4" />
+                <span>Launch Live Auction</span>
+              </>
+            )}
+          </button>
+
+          <button
+            type="submit"
+            disabled={loading}
+            onClick={() => setAddAnother(true)}
+            className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-white hover:bg-[#EDE5D6] text-[#1C1710] border border-[#1C1710]/15 text-sm font-bold shadow-xs transition flex items-center justify-center space-x-2 disabled:opacity-50"
+          >
+            {loading && addAnother ? (
+              <span>Listing...</span>
+            ) : (
+              <>
+                <PlusCircle className="w-4 h-4 text-[#3E6140]" />
+                <span>List &amp; Add Another Item</span>
+              </>
+            )}
+          </button>
+        </div>
 
       </form>
 

@@ -143,3 +143,102 @@ exports.getUserAuctionsAndBids = async (req, res) => {
     res.status(500).json({ message: 'Error fetching user auctions and bids', error: error.message });
   }
 };
+
+// 6. Delete a single auction (Owner or Admin)
+exports.deleteAuction = async (req, res) => {
+  try {
+    const auction = await Auction.findById(req.params.id);
+
+    if (!auction) {
+      return res.status(404).json({ message: 'Auction not found' });
+    }
+
+    if (auction.seller.toString() !== req.user.userId && req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Unauthorized to delete this auction' });
+    }
+
+    await Auction.findByIdAndDelete(req.params.id);
+    await Bid.deleteMany({ auction: req.params.id });
+
+    res.json({ message: 'Auction removed successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting auction', error: error.message });
+  }
+};
+
+// 7. Bulk Delete multiple auctions (Owner or Admin)
+exports.bulkDeleteAuctions = async (req, res) => {
+  try {
+    const { auctionIds } = req.body;
+
+    if (!Array.isArray(auctionIds) || auctionIds.length === 0) {
+      return res.status(400).json({ message: 'Please provide a list of auction IDs to delete.' });
+    }
+
+    const userId = req.user.userId;
+    const isAdmin = req.user.role === 'admin';
+
+    const filter = isAdmin
+      ? { _id: { $in: auctionIds } }
+      : { _id: { $in: auctionIds }, seller: userId };
+
+    const matching = await Auction.find(filter).select('_id');
+    const matchedIds = matching.map(m => m._id);
+
+    if (matchedIds.length === 0) {
+      return res.status(404).json({ message: 'No matching auctions found to remove.' });
+    }
+
+    const result = await Auction.deleteMany({ _id: { $in: matchedIds } });
+    await Bid.deleteMany({ auction: { $in: matchedIds } });
+
+    res.json({
+      message: `Successfully removed ${result.deletedCount} auction item(s).`,
+      deletedCount: result.deletedCount,
+      deletedIds: matchedIds
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error in bulk removal', error: error.message });
+  }
+};
+
+// 8. Bulk Create multiple auctions
+exports.bulkCreateAuctions = async (req, res) => {
+  try {
+    const { items } = req.body;
+
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ message: 'Please provide a list of items to list.' });
+    }
+
+    const created = [];
+    for (const item of items) {
+      if (!item.title || !item.startingPrice || !item.endsAt) continue;
+
+      const price = Number(item.startingPrice);
+      if (isNaN(price) || price < 0) continue;
+
+      const auction = new Auction({
+        title: item.title,
+        description: item.description || 'Verified auction listing on BidVault.',
+        images: item.imageUrl ? [item.imageUrl] : ['https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=80'],
+        seller: req.user.userId,
+        startingPrice: price,
+        currentBid: price,
+        endsAt: new Date(item.endsAt),
+        status: 'active'
+      });
+
+      await auction.save();
+      created.push(auction);
+    }
+
+    res.status(201).json({
+      message: `Successfully listed ${created.length} auction item(s).`,
+      count: created.length,
+      auctions: created
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error in bulk auction creation', error: error.message });
+  }
+};
